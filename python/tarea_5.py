@@ -17,44 +17,48 @@ def main():
     #         [4,7,6,6,9,2,0,2,5,1],
     #         [2,5,6,0,6,8,0,5,2,0],]
 
-    M = int(input('Introduce las filas de la matriz zona petrolera: '))
-    N = int(input('Introduce las columnas de la matriz zona petrolera: '))
-    O = int(input('Introduce las filas de la matriz de la plataforma: '))
-    P = int(input('Introduce las columnas de la matriz de la plataforma: '))
-    print('')
+    values = input('Introduce los valores M,N,O,P: ').split(',')
+    M = int(values[0])
+    # N = int(values[1])
+    O = int(values[2])
+    P = int(values[3])
 
     array = []
     for m in range(M):
         row = []
-        for n in range(N):
-            row.append(int(input(f'Introduce el elemento {m}x{n} de la matriz petrolera: ')))
+        row_input = input(f'Introduce la fila {m}: ').split(',')
+        for c in row_input[::]:
+            row.append(int(c))
         array.append(row)
     np_array = np.array(array)
+    # print('')
+    # print(np_array)
 
-    sum = 0
+    total_sum = 0
     higer = 0
     coords = []
     order = None
 
     P, O = (P, O) if O > P else (O, P)
     for t in range(2 if O != P else 1):
-        v_size, h_size = (P, O) if t else (O, P)
+        v_size, h_size = (O, P) if t else (P, O)
 
         for y in range(np_array.shape[0]-v_size+1):
             for x in range(np_array.shape[1]-h_size+1):
                 for i in range(v_size):
                     for e in range(h_size):
-                        sum += np_array[i+y][e+x]
-                if sum > higer:
-                    higer = sum
+                        total_sum += np_array[y+i][x+e]
+                if total_sum > higer:
+                    higer = total_sum
                     coords = [y,x]
-                    if O == P:
+                    print(np_array[y:y+v_size, x:x+h_size])
+                    if O == P or higer == sum([e for row in np_array[y:y+h_size, x:x+v_size] for e in row]):
                         order = 'I'
                     else:
-                        order = ('H') if t else ('V')
-                sum = 0
-        # print(t)
-
+                        order = ('V') if t else ('H')
+                total_sum = 0
+    
+    print('')
     print(f'({coords[0]}, {coords[1]})')
     print(higer)
     print(order)
