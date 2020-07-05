@@ -51,7 +51,7 @@ def main():
                 if total_sum > higer:
                     higer = total_sum
                     coords = [y,x]
-                    print(np_array[y:y+v_size, x:x+h_size])
+                    # print(np_array[y:y+v_size, x:x+h_size])
                     if O == P or higer == sum([e for row in np_array[y:y+h_size, x:x+v_size] for e in row]):
                         order = 'I'
                     else:
