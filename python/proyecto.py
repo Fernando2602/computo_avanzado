@@ -73,7 +73,7 @@ def animate(i):
     plt.ylim(axis_limits)
     plt.scatter([p[0] for p in b_values], [p[1] for p in b_values], 20, "k")
     # plt.scatter([p[0] for p in values], [p[1] for p in values], 20, "r")
-    plt.savefig(f"image{iterations}")
+    # plt.savefig(f"image{iterations}")
     iterations += 1
 
 
@@ -96,7 +96,7 @@ def main():
     plt.ylabel("Y label")
     plt.xlim(axis_limits)
     plt.ylim(axis_limits)
-    plt.savefig(f"image")
+    # plt.savefig(f"image")
 
     # SETING  THE FUNCANIMATION FUNTCION
     ani = FuncAnimation(plt.gcf(), animate, interval=100)
