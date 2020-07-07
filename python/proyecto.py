@@ -2,119 +2,90 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from itertools import count
-import math
 
-# FITNESS FUNCTION
-# f(x,y) = x^2+y^y
+class pso_algorithm():
+    def __init__(self, dimentions, particles, fitness_function, max_velocity=10):
+        # DEFINING INITIAL CONSTANTS
+        self.dimentions = dimentions
+        self.particles = particles
+        self.fitness_function = fitness_function
+        self.max_velocity = max_velocity
+        self.p_space = (-100, 100)
+        self.axis_limits = (-100, 100)
+        self.iterations = 0
+        self.c1, self.c2 = 2.05, 2.05
+        self.g = None
 
-axis_limits = (-100, 100)
-max_velocity = 1
-iterations = 0
-c1, c2 = 2.05, 2.05
-# g = None
+        # DEFINITION OF THE INITIAL RANDOM VALUES AND THE INITIAL BETTER SET
+        self.values = np.random.randint(self.p_space[0], self.p_space[1], size=(self.particles, self.dimentions))
+        self.betters = np.array([self.fitness_function(value) for value in self.values])
+        self.velocities = np.random.rand(self.particles, self.dimentions)
+        self.b_values = self.values.copy()
+
+        if self.dimentions == 2:
+            # CREATION AND STYLING OF THE CHART
+            plt.scatter([p[0] for p in self.b_values], [p[1] for p in self.b_values], 20, "k")
+            plt.title("Initial PSO Algotithm")
+            plt.xlabel("X label")
+            plt.ylabel("Y label")
+            plt.xlim(self.axis_limits)
+            plt.ylim(self.axis_limits)
+
+            # SETING  THE FUNC ANIMATION FUNCTION
+            self.ani = FuncAnimation(plt.gcf(), self.animate, interval=100)
+            plt.show()
+        else:
+            for _ in range(self.dimentions*1000):
+                self.evaluate()
+                print(f'iteracion {self.iterations}: {self.betters[self.g]}')
+                self.iterations += 1
+            print(f'{self.betters[self.g]} | {self.b_values[self.g]}')
 
 
-# def set_betters():
-#     global betters
-#     betters = np.array([values[0][i]**2+values[1][i]**2 for i in range(values.shape[1])])
+    def animate(self, i):
+        self.evaluate()
 
-# def get_values():
-#     return np.random.randint(-100,100, size=(2,10))
+        plt.clf()
+        plt.title(f"PSO Iteration: {i}")
+        plt.xlim(self.axis_limits)
+        plt.ylim(self.axis_limits)
+        plt.scatter([p[0] for p in self.b_values], [p[1] for p in self.b_values], 20, "k")
+
+        if np.max(self.b_values) - np.min(self.b_values) == 0:
+            self.ani.event_source.stop()
+
+
+    def evaluate(self):
+        newp_evaluated = np.array([self.fitness_function(value) for value in self.values])
+
+        for i in range(len(newp_evaluated)):
+            if newp_evaluated[i] < self.betters[i]:
+                self.betters[i] = newp_evaluated[i]
+                self.b_values[i] = self.values[i]
+        self.g = np.argmin(self.betters)
+
+        for i in range(len(self.velocities)):
+            self.velocities[i] = self.velocities[i] + np.random.rand(self.dimentions)*self.c1*(self.b_values[i]-self.values[i]) + np.random.rand(self.dimentions)*self.c2*(self.b_values[self.g]-self.values[i])
+            for e in range(self.velocities.shape[1]):
+                if abs(self.velocities[i][e]) > self.max_velocity:
+                    self.velocities[i][e] = 0
+
+        for i in range(len(self.values)):
+            self.values[i] = self.values[i] + self.velocities[i]
 
 
 def fitness_function(particle):
-    p_evaluated = 0
-    for coord in particle:
-        p_evaluated += coord**2
-    print(f'{particle} | {p_evaluated}')
-    return p_evaluated
-
-
-def evaluate():
-    global values
-    newp_evaluated = np.array([fitness_function(value) for value in values])
-
-    global b_values
-    for i in range(len(newp_evaluated)):
-        if newp_evaluated[i] < betters[i]:
-            betters[i] = newp_evaluated[i]
-            b_values[i] = values[i]
-
-    global g
-    g = np.argmin(betters)
-
-    global velocities
-    for i in range(len(velocities)):
-        # print(f'{velocities[i]} + {np.random.rand(2)*c1*(b_values[i]-values[i])} + {np.random.rand(2)*c2*(b_values[g]-values[i])} = {velocities[i] + np.random.rand(2)*c1*(b_values[i]-values[i]) + np.random.rand(2)*c2*(b_values[g]-values[i])}')
-
-        velocities[i] = velocities[i] + np.random.rand(2)*c1*(
-            b_values[i]-values[i]) + np.random.rand(2)*c2*(b_values[g]-values[i])
-
-        print(velocities[i])
-
-        for e in range(velocities.shape[1]):
-            if abs(velocities[i][e]) > 20:
-                velocities[i][e] = 0
-                print('special', velocities[i])
-
-    for i in range(len(values)):
-        values[i] = values[i] + velocities[i]
-
-    print('')
-
-
-def animate(i):
-    evaluate()
-
-    global iterations
-    plt.clf()
-    plt.title(f"Sample Graph iteration: {iterations}")
-    plt.xlim(axis_limits)
-    plt.ylim(axis_limits)
-    plt.scatter([p[0] for p in b_values], [p[1] for p in b_values], 20, "k")
-    # plt.scatter([p[0] for p in values], [p[1] for p in values], 20, "r")
-    # plt.savefig(f"image{iterations}")
-    iterations += 1
-
+    return sum([coord**2 for coord in particle])
 
 def main():
-
-    # DEFINITION OF THE INITIAL RANDOM VALUES AND THE INITIAL BETTER SET
-    global values
-    values = np.random.randint(-100, 100, size=(50, 2))
-    global betters
-    betters = np.array([fitness_function(value) for value in values])
-    global velocities
-    velocities = np.random.rand(50, 2)
-    global b_values
-    b_values = values.copy()
-
-    # CREATION AND STYLING OF THE CHART
-    plt.scatter([p[0] for p in b_values], [p[1] for p in b_values], 20, "k")
-    plt.title("Initial Sample Graph")
-    plt.xlabel("X label")
-    plt.ylabel("Y label")
-    plt.xlim(axis_limits)
-    plt.ylim(axis_limits)
-    # plt.savefig(f"image")
-
-    # SETING  THE FUNCANIMATION FUNTCION
-    ani = FuncAnimation(plt.gcf(), animate, interval=100)
-    plt.show()
-
+    # 2 DIMENTIONS
+    pso1 = pso_algorithm(2, 1000, fitness_function, max_velocity=20)
+    # 10 DIMENTIONS
+    # pso2 = pso_algorithm(10, 1000, fitness_function)
+    # 50 DIMENTIONS
+    # ps3 = pso_algorithm(50, 100, fitness_function)
+    # 100 DIMENTIONS
+    # pso4 = pso_algorithm(100, 100, fitness_function)
 
 if __name__ == "__main__":
     main()
-
-
-# def evaluate():
-#     new_values = get_values()
-
-#     index = 0
-#     for i in range(new_values.shape[1]):
-#         if (new_values[0][i]**2+new_values[1][i]**2) < betters[index]:
-#             values[0][i], values[1][i] = new_values[0][i], new_values[1][i]
-#         index += 1
-
-#     set_betters()
-#     better_index = np.argmin(betters)
