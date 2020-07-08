@@ -15,8 +15,5 @@ if __name__ == "__main__":
 
     for i in threads:
         i.join()
-
-    # for i in range(1, proc+1):
-    #     count(i, ub, proc)
     
     print('\n'.join(str(val) for val in custom_list))
